@@ -3,9 +3,13 @@
 import url_analysis as ua
 import pandas as pd
 import numpy as np
+import math
+import operator
+
 from sklearn import svm
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import accuracy_score
+from sklearn import tree
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
 
 # features_train, labels_train = ua.feature_extraction('dataset/train')
 # features_test, labels_test = ua.feature_extraction('dataset/test')
@@ -19,21 +23,28 @@ labels_train = np.ones(len(ua.extractURL('dataset/train').get('spam'))).tolist()
 labels_test = np.ones(len(ua.extractURL('dataset/test').get('spam'))).tolist() + np.zeros(len(ua.extractURL('dataset/test').get('notspam'))).tolist()
 
 
-# def svc_param_selection(X, y, nfolds):
-#     Cs = [0.001, 0.01, 0.1, 1, 10]
-#     gammas = [0.001, 0.01, 0.1, 1]
-#     param_grid = {'C': Cs, 'gamma' : gammas}
-#     grid_search = GridSearchCV(svm.SVC(kernel='rbf'), param_grid, cv=nfolds)
-#     grid_search.fit(X, y)
-#     grid_search.best_params_
-#     return grid_search.best_params_
-#
-# best_C, best_gamma = svc_param_selection(features_train, labels_train, 2)
+# Support Vector Machine Classifier
 
-clf = svm.SVC(kernel='linear')
+clf = svm.SVC(kernel='linear', C=0.1)
 
 clf.fit(features_train, labels_train)
 
 url_true = clf.predict(features_test)
 
-print 'Accuracy for the LinearSVM : ', accuracy_score(url_true, labels_test) * 100, '%'
+print 'Evaluation Metrics for LinearSVM are : '
+print 'Accuracy score : ', accuracy_score(url_true, labels_test) * 100, '%'
+print 'Precision score : ', precision_score(url_true, labels_test)
+print ''
+
+# Random Forest Classifier
+
+clf = RandomForestClassifier(max_depth=2, random_state=0)
+
+clf.fit(features_train, labels_train)
+
+url_true = clf.predict(features_test)
+
+print 'Evaluation Metrics for Random Forests are : '
+print 'Accuracy score : ', accuracy_score(url_true, labels_test) * 100, '%'
+print 'Precision score : ', precision_score(url_true, labels_test)
+print ''
