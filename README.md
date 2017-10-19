@@ -9,7 +9,7 @@ The work done is towards my Study Project CS F266. Dataset has been split into t
 | Word Presence   | 88.05%        |
 | Word Frequency  | 83.71%        |
 
-* The evalutaion for the URL classifications were:
+* The performance for the URL classifications were:
 
 | Model           | Accuracy      | Precision |
 | :-------------: |:-------------:|:---------:|
