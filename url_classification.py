@@ -7,7 +7,6 @@ import math
 import operator
 
 from sklearn import svm
-from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
 

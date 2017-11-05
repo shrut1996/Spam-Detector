@@ -5,17 +5,20 @@ import os
 import re
 import json
 import string
-from math import log
 import nltk
-# from nltk.stem import SnowballStemmer
-# sb = SnowballStemmer('english')
+import pandas as pd
+from math import log
+from collections import Counter
+from nltk.stem import SnowballStemmer
+sb = SnowballStemmer('english')
 
 nltk.download('stopwords')
 stop_words = set(nltk.corpus.stopwords.words('english'))
 
 spam_count = {}
 ham_count = {}
-
+spam_words = []
+ham_words = []
 class_dict = {}
 model_words_count = {}
 
@@ -39,6 +42,12 @@ def buildWordVectorModel(path):
             distinct_words = filter(None, distinct_words)
             distinct_words = [reduce(lambda x,y: x+y if x[-2:] != y*2 else x, s, "") for s in distinct_words]
             distinct_words = [item for item in distinct_words if len(item) < 10]
+            distinct_words = [re.sub(r'[^\x00-\x7f]',r'', x) for x in distinct_words]
+            distinct_words = [items.decode('unicode_escape').encode('ascii', 'ignore') for items in distinct_words]
+            if class_name == 'spam':
+                spam_words.append(distinct_words)
+            else:
+                ham_words.append(distinct_words)
             # distinct_words = [sb.stem(item) for item in distinct_words]
             for word in distinct_words:
                 class_dict[class_name]['word_counts'][word]['frequency_count'] = class_dict.setdefault(class_name, {}).setdefault('word_counts', {}).setdefault(word, {}).setdefault('frequency_count', 0) + words.count(word)
@@ -155,9 +164,30 @@ def loadFromFile(file_name):
     fle = open(file_name, 'r')
     model = json.load(fle, encoding="ISO-8859-1")
     class_dict = model['class_dict']
-    model_words_count = len(class_dict.get('spam').get('word_counts')) + len(
-        class_dict.get('notspam').get('word_counts'))
+    model_words_count = len(class_dict.get('spam').get('word_counts')) + len(class_dict.get('notspam').get('word_counts'))
 
 
 train('dataset/train', 'util/StorageUtil.json')
 predict('dataset/test', 'util/StorageUtil.json')
+
+spam_words = pd.Series(sum(spam_words, []))
+ham_words = pd.Series(sum(ham_words, []))
+
+df1 = pd.DataFrame.from_dict(Counter(spam_words), orient='index').reset_index()
+df2 = pd.DataFrame.from_dict(Counter(ham_words), orient='index').reset_index()
+df1 = df1.rename(columns={'index':'spam_words', 0:'count'})
+df2 = df2.rename(columns={'index':'ham_words', 0:'count'})
+
+df1.sort_values(by=['count'], inplace=True, ascending=False)
+df1 = df1.reset_index()
+df2.sort_values(by=['count'], inplace=True, ascending=False)
+df2 = df2.reset_index()
+
+df1.drop(['index'], axis=1, inplace=True)
+print df1.head(50)
+
+df2.drop(['index'], axis=1, inplace=True)
+print df2.head(50)
+
+df1.to_csv('spam_words_count.csv')
+df2.to_csv('ham_words_count.csv')
