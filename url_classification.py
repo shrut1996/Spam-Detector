@@ -32,7 +32,7 @@ url_true = clf.predict(features_test)
 
 print 'Evaluation Metrics for LinearSVM are : '
 print 'Accuracy score : ', accuracy_score(url_true, labels_test) * 100, '%'
-print 'Precision score : ', precision_score(url_true, labels_test)
+print 'F1 score : ', f1_score(url_true, labels_test)
 print ''
 
 # Random Forest Classifier
@@ -45,5 +45,5 @@ url_true = clf.predict(features_test)
 
 print 'Evaluation Metrics for Random Forests are : '
 print 'Accuracy score : ', accuracy_score(url_true, labels_test) * 100, '%'
-print 'Precision score : ', precision_score(url_true, labels_test)
+print 'F1 score : ', f1_score(url_true, labels_test)
 print ''
